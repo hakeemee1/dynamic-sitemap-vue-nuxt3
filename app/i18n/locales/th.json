@@ -1,6 +1,7 @@
 {
   "nav": {
-    "catalog": "รายการสินค้า"
+    "catalog": "รายการสินค้า",
+    "sitemap": "ดู sitemap.xml"
   },
   "catalog": {
     "title": "สินค้าทั้งหมด"

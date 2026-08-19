@@ -11,7 +11,7 @@ const availableLocales = computed(() => locales.value.filter(l => l.code !== loc
         <NuxtLink to="/" class="font-semibold">
           {{ t('nav.catalog') }}
         </NuxtLink>
-        <nav class="flex gap-3 text-sm">
+        <nav class="flex items-center gap-3 text-sm">
           <button
             v-for="l in availableLocales"
             :key="l.code"
@@ -21,6 +21,14 @@ const availableLocales = computed(() => locales.value.filter(l => l.code !== loc
           >
             {{ l.name }}
           </button>
+          <a
+            href="/sitemap.xml"
+            target="_blank"
+            rel="noopener"
+            class="rounded border border-slate-300 px-3 py-1 text-slate-600 hover:border-slate-400 hover:text-slate-900"
+          >
+            {{ t('nav.sitemap') }}
+          </a>
         </nav>
       </div>
     </header>
