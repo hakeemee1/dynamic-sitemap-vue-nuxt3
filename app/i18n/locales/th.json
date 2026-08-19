@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "catalog": "รายการสินค้า"
+  },
+  "catalog": {
+    "title": "สินค้าทั้งหมด"
+  },
+  "detail": {
+    "priceLabel": "ราคา",
+    "categoryLabel": "หมวดหมู่",
+    "backToCatalog": "กลับไปที่รายการสินค้า",
+    "notFoundTitle": "ไม่พบสินค้า",
+    "notFoundBody": "ไม่พบสินค้าที่คุณกำลังค้นหา"
+  }
+}

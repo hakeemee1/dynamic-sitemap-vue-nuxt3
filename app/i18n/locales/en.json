@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "catalog": "Product Catalog"
+  },
+  "catalog": {
+    "title": "All Products"
+  },
+  "detail": {
+    "priceLabel": "Price",
+    "categoryLabel": "Category",
+    "backToCatalog": "Back to catalog",
+    "notFoundTitle": "Product not found",
+    "notFoundBody": "We couldn't find the product you're looking for."
+  }
+}

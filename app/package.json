@@ -7,7 +7,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
@@ -37,6 +40,9 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "nuxt-headlessui": "^1.2.0",
-    "vite-svg-loader": "^5.1.0"
+    "typescript": "^5.9.0",
+    "vite-svg-loader": "^5.1.0",
+    "vitest": "^4.1.11",
+    "vue-tsc": "^3.0.0"
   }
 }
