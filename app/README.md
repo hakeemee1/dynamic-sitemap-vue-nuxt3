@@ -1,9 +1,9 @@
 # Dynamic Sitemap SEO POC
 
-A small Nuxt 3 app demonstrating how to make `@nuxtjs/sitemap` emit correct, canonical,
-multi-language URLs for product pages that are routed via a query string
-(`/products/detail?product_id=<id>`) instead of a file-based dynamic segment — a routing
-pattern that `@nuxtjs/sitemap`'s auto-discovery cannot see on its own.
+A small Nuxt 3 app demonstrating how to make `@nuxtjs/sitemap` emit correct, canonical URLs
+for product pages that are routed via a query string (`/products/detail?product_id=<id>`)
+instead of a file-based dynamic segment — a routing pattern that `@nuxtjs/sitemap`'s
+auto-discovery cannot see on its own.
 
 This is a generic proof-of-concept only. No real client name, domain, or production URL
 appears anywhere in this repo. See `../docs/dynamic-sitemap-seo-poc-spec.md` for the full spec.
@@ -17,10 +17,14 @@ npm run dev
 
 Then open:
 
-- `http://localhost:3000/` — the product catalog (Thai, default locale)
-- `http://localhost:3000/en` — the product catalog (English)
+- `http://localhost:3000/` — the product catalog (Thai by default)
 - `http://localhost:3000/products/detail?product_id=sku-001` — a product detail page
 - `http://localhost:3000/sitemap.xml` — the generated sitemap
+
+The language switcher in the header sets the `i18n_redirected` cookie and re-renders the
+current page in the new language — the URL doesn't change. This matches how the real
+production frontends currently switch locale (see "What this doesn't cover" below for the
+SEO tradeoff that implies).
 
 ## The problem, reproduced ("before")
 
@@ -33,8 +37,8 @@ start the dev server with the hook toggled off:
 NUXT_PUBLIC_ENABLE_PRODUCT_SITEMAP=false npm run dev
 ```
 
-Then reload `/sitemap.xml`. You'll see only the static, file-based routes (`/`, `/en`, and the
-bare `/products/detail` route shell) — **zero individual product URLs**, because the sitemap
+Then reload `/sitemap.xml`. You'll see only the static, file-based routes (`/` and the bare
+`/products/detail` route shell) — **zero individual product URLs**, because the sitemap
 module has no way to discover `product_id` query-string values on its own.
 
 Stop the server and run `npm run dev` again (or unset the env var) to go back to the "after"
@@ -46,21 +50,14 @@ With the toggle on (the default), `server/plugins/sitemap-urls.ts` hooks into `@
 `sitemap:input` Nitro hook, fetches the mock product catalog from `server/api/products.ts`, and
 adds one sitemap entry per product via the pure function in `server/utils/sitemapEntries.ts`.
 
-Each entry:
-
-- has a canonical `loc` containing **only** the `product_id` query parameter — any other fields
-  a product record carries (`category`, `bundleId`, `statusFlag`, ...) are deliberately excluded,
-  even though a real detail page might accept them as extra query params. This is what keeps the
-  same product from being indexed under several near-duplicate URLs.
-- includes `hreflang` alternates for both locales (`th`, unprefixed/default; `en`, `/en/`-prefixed)
-  plus an `x-default` alternate pointing at the Thai (default) URL.
+Each entry has a canonical `loc` containing **only** the `product_id` query parameter — any
+other fields a product record carries (`category`, `bundleId`, `statusFlag`, ...) are
+deliberately excluded, even though a real detail page might accept them as extra query params.
+This is what keeps the same product from being indexed under several near-duplicate URLs.
 
 ```xml
 <url>
     <loc>http://localhost:3000/products/detail?product_id=sku-001</loc>
-    <xhtml:link rel="alternate" hreflang="th" href="http://localhost:3000/products/detail?product_id=sku-001" />
-    <xhtml:link rel="alternate" hreflang="en" href="http://localhost:3000/en/products/detail?product_id=sku-001" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="http://localhost:3000/products/detail?product_id=sku-001" />
 </url>
 ```
 
@@ -96,3 +93,8 @@ changes) to stay accurate. That rebuild-trigger tooling is out of scope for this
 - Locales beyond Thai and English.
 - `<link rel="canonical">` meta tags on the product page itself (this POC covers sitemap-side
   canonicalization only).
+- **`hreflang` / per-language URLs.** Locale here is read from the `i18n_redirected` cookie on
+  a single URL per page, matching the real production frontends. That means there's no
+  second URL for a `hreflang` alternate to point at, so none are emitted — see the
+  "Multi-language sites" section of `../docs/dynamic-sitemap-seo-article.md` for why that's a
+  real (separate) SEO gap, not a bug in this fix.

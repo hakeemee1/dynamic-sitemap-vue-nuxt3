@@ -2,7 +2,6 @@
 import type { ProductRecord } from '../../server/api/products'
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
 const route = useRoute()
 
 const productId = computed(() => {
@@ -46,7 +45,7 @@ const product = computed(() =>
         {{ t('detail.notFoundBody') }}
       </p>
     </template>
-    <NuxtLink :to="localePath('/')" class="mt-6 inline-block text-sm text-slate-500 hover:underline">
+    <NuxtLink to="/" class="mt-6 inline-block text-sm text-slate-500 hover:underline">
       &larr; {{ t('detail.backToCatalog') }}
     </NuxtLink>
   </div>

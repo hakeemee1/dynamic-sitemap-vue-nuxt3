@@ -3,53 +3,20 @@ export interface Product {
   [key: string]: unknown
 }
 
-export interface LocaleConfig {
-  code: string
-  /** URL path prefix for this locale, e.g. '' for the unprefixed default locale, '/en' otherwise. */
-  prefix: string
-  isDefault: boolean
-}
-
-export interface SitemapAlternative {
-  hreflang: string
-  href: string
-}
-
 export interface SitemapEntry {
   loc: string
-  alternatives: SitemapAlternative[]
 }
 
-export const DEFAULT_LOCALES: LocaleConfig[] = [
-  { code: 'th', prefix: '', isDefault: true },
-  { code: 'en', prefix: '/en', isDefault: false },
-]
-
-function buildProductPath(productId: string, prefix: string): string {
-  return `${prefix}/products/detail?product_id=${encodeURIComponent(productId)}`
+function buildProductPath(productId: string): string {
+  return `/products/detail?product_id=${encodeURIComponent(productId)}`
 }
 
-export function buildProductSitemapEntries(
-  products: Product[],
-  locales: LocaleConfig[] = DEFAULT_LOCALES,
-): SitemapEntry[] {
-  const defaultLocale = locales.find(locale => locale.isDefault) ?? locales[0]
-  if (!defaultLocale) return []
-
-  return products.map((product) => {
-    const alternatives: SitemapAlternative[] = locales.map(locale => ({
-      hreflang: locale.code,
-      href: buildProductPath(product.id, locale.prefix),
-    }))
-
-    alternatives.push({
-      hreflang: 'x-default',
-      href: buildProductPath(product.id, defaultLocale.prefix),
-    })
-
-    return {
-      loc: buildProductPath(product.id, defaultLocale.prefix),
-      alternatives,
-    }
-  })
+// Locale is determined client-side via the i18n_redirected cookie, not the URL, so each product
+// has exactly one crawlable URL - there is no second locale URL for a hreflang alternate to
+// point at. See docs/dynamic-sitemap-seo-article.md for why that's a real SEO limitation of this
+// pattern, not an oversight.
+export function buildProductSitemapEntries(products: Product[]): SitemapEntry[] {
+  return products.map(product => ({
+    loc: buildProductPath(product.id),
+  }))
 }

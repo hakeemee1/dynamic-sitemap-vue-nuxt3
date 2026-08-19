@@ -20,16 +20,4 @@ describe('buildProductSitemapEntries', () => {
     expect(entries).toHaveLength(1)
     expect(entries[0].loc).toBe('/products/detail?product_id=sku-42')
   })
-
-  it('includes hreflang alternates for th and en, plus x-default pointing at the th (default) URL', () => {
-    const entries = buildProductSitemapEntries([
-      { id: 'sku-42', name: { th: 'เสื้อ', en: 'Shirt' } },
-    ])
-
-    expect(entries[0].alternatives).toEqual([
-      { hreflang: 'th', href: '/products/detail?product_id=sku-42' },
-      { hreflang: 'en', href: '/en/products/detail?product_id=sku-42' },
-      { hreflang: 'x-default', href: '/products/detail?product_id=sku-42' },
-    ])
-  })
 })

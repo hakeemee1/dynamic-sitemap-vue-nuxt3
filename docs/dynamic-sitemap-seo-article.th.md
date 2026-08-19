@@ -45,23 +45,12 @@ sitemap ไม่เจอ — ซึ่งเป็นช่องทางท�
 sitemap entry หนึ่งรายการต่อสินค้าหนึ่งชิ้น:
 
 ```xml
-<url>
-    <loc>https://example-shop.test/products/detail?product_id=42</loc>
-    <xhtml:link rel="alternate" hreflang="th" href="https://example-shop.test/products/detail?product_id=42" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://example-shop.test/en/products/detail?product_id=42" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://example-shop.test/products/detail?product_id=42" />
-</url>
-<url>
-    <loc>https://example-shop.test/products/detail?product_id=43</loc>
-    <xhtml:link rel="alternate" hreflang="th" href="https://example-shop.test/products/detail?product_id=43" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://example-shop.test/en/products/detail?product_id=43" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://example-shop.test/products/detail?product_id=43" />
-</url>
+<url><loc>https://example-shop.test/products/detail?product_id=42</loc></url>
+<url><loc>https://example-shop.test/products/detail?product_id=43</loc></url>
 ```
 
-ตอนนี้สินค้าทุกชิ้นมี entry เป็นของตัวเอง และแต่ละ entry ก็บอก search engine ด้วยว่ามีหน้าเวอร์ชัน
-ภาษาไหนบ้าง (อธิบายต่อด้านล่าง) กลไกคือการ hook เข้าไปในขั้นตอนสร้าง URL ของโมดูล sitemap: ดึง
-รายการสินค้าจาก backend เดียวกับที่เว็บไซต์ใช้อยู่แล้ว แปลงสินค้าแต่ละชิ้นเป็น canonical URL แล้วส่ง
+ตอนนี้สินค้าทุกชิ้นมี entry เป็นของตัวเอง กลไกคือการ hook เข้าไปในขั้นตอนสร้าง URL ของโมดูล sitemap:
+ดึงรายการสินค้าจาก backend เดียวกับที่เว็บไซต์ใช้อยู่แล้ว แปลงสินค้าแต่ละชิ้นเป็น canonical URL แล้วส่ง
 ผลลัพธ์ให้โมดูล sitemap รวมกับ route ที่มันค้นพบเองตามปกติ
 
 ## ไม่ใช่แค่ "เพิ่ม URL" — canonical URL ก็สำคัญเช่นกัน
@@ -88,18 +77,28 @@ canonical URL เดียวของมัน" ในกรณีของ que
 อื่นติดมาด้วยกี่ตัวก็ตาม ความครอบคลุม (coverage) และการทำให้เป็น canonical เป็นสองส่วนที่ต้องมีคู่กัน
 ใน sitemap ที่ถูกต้อง แก้แค่อย่างใดอย่างหนึ่งโดยไม่แก้อีกอย่างก็ยังเสียโอกาสอยู่ดี
 
-## เว็บไซต์หลายภาษา: hreflang alternates
+## ปัญหาที่สอง ที่เกี่ยวข้องกัน: เว็บไซต์หลายภาษาที่ไม่มี URL แยกตามภาษา
 
 เว็บไซต์ที่มีมากกว่าหนึ่งภาษาจะมีอีกชั้นหนึ่งเพิ่มเข้ามา: ผู้เข้าชมที่พูดภาษาฝรั่งเศสและผู้เข้าชมที่พูด
 ภาษาไทยที่ค้นหาสินค้าชิ้นเดียวกัน ควรจะไปหน้าเวอร์ชันภาษาของตัวเอง ไม่ใช่ผลลัพธ์ที่ไม่ตรงภาษาหรือดู
 เหมือนซ้ำกัน search engine ใช้ `hreflang` annotation เป็นหลักในการตัดสินใจเรื่องนี้ — เป็นลิงก์ต่อภาษา
-ที่บอก crawler ว่า "หน้านี้มีเวอร์ชันภาษา X อยู่ที่ URL อีกอันนี้"
+ที่บอก crawler ว่า "หน้านี้มีเวอร์ชันภาษา X อยู่ที่ URL อีกอันนี้" ซึ่งสิ่งสำคัญคือกลไกนี้จะใช้ได้ก็ต่อเมื่อ
+แต่ละภาษามี URL *เป็นของตัวเอง* จริงๆ เท่านั้น
 
-ตัวอย่างก่อน/หลังด้านบนใช้ 2 locale: ไทย (ภาษา default ไม่มี prefix) และอังกฤษ (มี prefix `/en/`)
-sitemap entry ของสินค้าแต่ละชิ้นจะมี annotation 3 ตัว: หนึ่งสำหรับ `th`, หนึ่งสำหรับ `en`, และ
-`x-default` — ค่า fallback สำหรับภาษา/ภูมิภาคที่ไม่ได้ระบุไว้ชัดเจน ซึ่งชี้ไปที่ URL ของ locale
-default เมื่อมี logic สร้าง canonical URL อยู่แล้ว การขยายให้สร้าง alternates สำหรับ locale ใหม่ก็
-เป็นแค่การเพิ่มเติมเล็กๆ แบบตรงไปตรงมา ไม่ใช่การเขียนใหม่ทั้งหมด
+frontend ของเราตอนนี้สลับภาษาด้วยวิธีที่ต่างออกไป: ใช้ URL เดียวต่อหนึ่งหน้า โดยอ่านภาษาที่ใช้งานอยู่
+กลับมาจาก cookie (`i18n_redirected`) แทนที่จะมาจากตัว URL เอง ซึ่งเป็นทางเลือกที่สมเหตุสมผลดีสำหรับ
+ประสบการณ์การใช้งาน — ผู้เข้าชมที่กลับมาใหม่จะได้ภาษาของตัวเองอัตโนมัติ โดยไม่มี prefix `/en/` มา
+รก address bar แต่มันมีผลข้างเคียงที่พลาดง่าย: crawler ไม่ได้พก cookie ติดตัวไปในแต่ละ request มันไม่มี
+ภาษาที่จำไว้เลย ดังนั้นทุกครั้งที่มันขอ `/products/detail?product_id=42` มันจะได้รับเนื้อหาภาษา
+*default* เสมอ ส่วนเนื้อหาภาษาอื่นที่ไม่ใช่ default บน URL เดียวกันนี้ ในแง่ของการ index จึงมองไม่เห็น
+เลย — เพราะไม่มี URL แยกให้มัน index อยู่
+
+พูดให้เป็นรูปธรรม หมายความว่า pattern นี้สร้าง `hreflang` annotation ไม่ได้เลย เพราะไม่มี URL ที่สอง
+ให้ alternate ชี้ไปหา นี่คือช่องโหว่ SEO ที่สอง ที่เกิดขึ้นจริง อยู่คู่กันกับปัญหา URL สินค้าหายไป —
+ไม่ใช่บั๊กของการแก้ sitemap แต่เป็นข้อจำกัดของการเลือก routing แบบนี้ตั้งแต่ต้น ซึ่งการแก้ sitemap เอง
+แก้ให้ไม่ได้ การจะแก้ปัญหานี้จริงๆ ต้องให้แต่ละภาษามี URL เป็นของตัวเอง (ผ่าน prefix, subdomain,
+หรือ query parameter) ซึ่งเป็นการเปลี่ยน routing ที่ใหญ่กว่าขอบเขตของ POC นี้ แต่ควรรู้ไว้ ก่อนจะสรุป
+เอาเองว่า "sitemap แก้แล้ว" หมายความว่า "เว็บไซต์หลายภาษานี้ index ได้ครบสมบูรณ์แล้ว"
 
 ## ข้อสังเกตเรื่องความสด: SSR เทียบกับ static generation
 
@@ -132,10 +131,15 @@ POC และบทความนี้จงใจไม่พูดถึง�
 - **canonical tag บนหน้าเว็บ** บทความและ POC นี้พูดถึงการทำ canonicalization ฝั่ง sitemap
   เท่านั้น ส่วนแท็ก `<link rel="canonical">` บนหน้าสินค้าเองเป็นการแก้ไขอีกเรื่องที่เกี่ยวข้องกัน
   แต่แยกกัน
+- **การให้แต่ละภาษามี URL เป็นของตัวเอง** ตามที่อธิบายไว้ด้านบน POC นี้จงใจคงรูปแบบเดิมไว้ คือใช้
+  cookie กำหนดภาษาบน URL เดียว ตามที่ frontend ของเราใช้อยู่จริง และไม่ได้ implement `hreflang`
+  หรือวิธีแก้ใดๆ สำหรับช่องโหว่เรื่อง indexability ที่เกิดจากรูปแบบนี้
 
 ## สรุป
 
 ถ้า frontend ไหนใช้ query string ในการ route ไปยังเนื้อหาที่ควรถูก index อย่าสมมติเอาเองว่าโมดูล
 sitemap มองเห็นมัน — ต้องตรวจสอบ และเมื่อจะแก้ ต้องแน่ใจว่าการแก้นั้นทำให้แต่ละหน้ามี canonical
-URL เดียว พร้อม language alternate ที่ถูกต้องเมื่อจำเป็น ไม่ใช่แค่ "เพิ่ม URL ให้มากขึ้น" การมี
-coverage โดยไม่มี canonicalization อาจเป็นแค่การแลกปัญหา SEO หนึ่งไปกับอีกปัญหาหนึ่ง
+URL เดียว ไม่ใช่แค่ "เพิ่ม URL ให้มากขึ้น" — การมี coverage โดยไม่มี canonicalization อาจเป็นแค่
+การแลกปัญหา SEO หนึ่งไปกับอีกปัญหาหนึ่ง จากนั้นให้ตรวจดูอีกชั้นถัดไปด้วย: ถ้าเว็บไซต์นั้นสลับภาษา
+โดยไม่เปลี่ยน URL ด้วย ต้องรู้ไว้ว่าเนื้อหาภาษาที่ไม่ใช่ default บนหน้านั้นจะมองไม่เห็นสำหรับ search
+engine เลย ไม่ว่า sitemap ข้างใต้จะถูกต้องแค่ไหนก็ตาม

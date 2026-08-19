@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const { locale, locales, t } = useI18n()
-const switchLocalePath = useSwitchLocalePath()
-const localePath = useLocalePath()
+const { locale, locales, t, setLocale } = useI18n()
 
 const availableLocales = computed(() => locales.value.filter(l => l.code !== locale.value))
 </script>
@@ -10,18 +8,19 @@ const availableLocales = computed(() => locales.value.filter(l => l.code !== loc
   <div class="min-h-screen bg-slate-50 text-slate-900">
     <header class="border-b border-slate-200 bg-white">
       <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-        <NuxtLink :to="localePath('/')" class="font-semibold">
+        <NuxtLink to="/" class="font-semibold">
           {{ t('nav.catalog') }}
         </NuxtLink>
         <nav class="flex gap-3 text-sm">
-          <NuxtLink
+          <button
             v-for="l in availableLocales"
             :key="l.code"
-            :to="switchLocalePath(l.code)"
+            type="button"
             class="text-slate-500 hover:text-slate-900"
+            @click="setLocale(l.code)"
           >
             {{ l.name }}
-          </NuxtLink>
+          </button>
         </nav>
       </div>
     </header>

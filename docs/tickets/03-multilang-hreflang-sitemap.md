@@ -1,13 +1,31 @@
-# 03 — Multi-language product URLs + hreflang alternates
+# 03 — Multi-language product content via cookie-based locale (no hreflang)
 
-**What to build:** Two-locale support (Thai default, no URL prefix; English, `/en/` prefix) via `@nuxtjs/i18n`'s `prefix_except_default` strategy, extended to the product detail route. Each product's sitemap entry gains `hreflang` alternate links for both locales plus `x-default`, pointing at the Thai (default) URL.
+**What to build:** Two-locale support (Thai default, English) via `@nuxtjs/i18n`'s `no_prefix`
+strategy, matching how the real production frontends currently do locale switching: a single
+URL per page, with the active language read from the `i18n_redirected` cookie
+(`detectBrowserLanguage`) rather than a `/en`/`/th` URL prefix.
+
+**Revision note:** This ticket originally specified a `prefix_except_default` strategy (distinct
+`/en/`-prefixed URLs) so that each product's sitemap entry could carry `hreflang` alternates. That
+was changed to match the cookie-only pattern the real frontends already use. Because locale is no
+longer part of the URL, there is only one crawlable URL per product — there's no second-locale URL
+left for a `hreflang` alternate to point at, so this ticket no longer produces any. That's a real
+SEO limitation of the cookie-only pattern (crawlers don't carry cookies, so they only ever see the
+default-locale content), not an oversight — see the "Multi-language sites" section of
+`docs/dynamic-sitemap-seo-article.md` for the write-up aimed at the knowledge-share audience.
 
 **Blocked by:** 02 — Canonical per-product sitemap entries via custom hook
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/products/detail?product_id=<id>` (Thai, default, no prefix) and `/en/products/detail?product_id=<id>` (English) both render the product's localized name/content
-- [ ] Product data in the mock API carries per-locale fields (at minimum a localized name) keyed by `th`/`en`
-- [ ] Each `/sitemap.xml` product entry includes `hreflang` alternates for `th` and `en`, plus an `x-default` alternate pointing at the Thai (default, unprefixed) URL
-- [ ] Unit tests (extending the pure function from ticket 02) cover: correct `/en/` prefixing on the English alternate, no prefix on the Thai alternate, and presence/correctness of `x-default`
-- [ ] The canonical URL rule from ticket 02 (only `product_id`, no noise params) still holds for both locale variants
+- [x] The catalog and product detail pages render in Thai or English from the same URL, based on
+      the `i18n_redirected` cookie (`@nuxtjs/i18n`'s `detectBrowserLanguage`, `no_prefix` strategy)
+- [x] Product data in the mock API carries per-locale fields (at minimum a localized name) keyed by
+      `th`/`en`
+- [x] The language switcher in the UI sets the cookie and re-renders the current page in the new
+      language, without changing the URL
+- [x] `/sitemap.xml` continues to emit exactly one canonical entry per product (`loc` containing
+      only `product_id`, per ticket 02) — no `hreflang`/`alternatives` are emitted, since there is
+      no second URL for them to reference
+- [x] The knowledge-share article explains why this pattern can't produce meaningful `hreflang`
+      annotations, as a second, related SEO gap alongside the missing-product-URLs problem

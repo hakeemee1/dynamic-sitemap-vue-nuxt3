@@ -13,10 +13,10 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  // @nuxtjs/sitemap auto-detects @nuxtjs/i18n and, by default, splits into a sitemap index
-  // with one sub-sitemap per locale. This POC instead hand-builds hreflang `alternatives` on
-  // a single flat /sitemap.xml (see server/plugins/sitemap-urls.ts), so that auto-splitting
-  // is turned off here.
+  // @nuxtjs/sitemap auto-detects @nuxtjs/i18n and, by default, splits into a sitemap index with
+  // one sub-sitemap per locale. Locale here is cookie-based, not URL-based (see i18n.strategy
+  // below), so there's nothing per-locale for it to split - keep it off and let
+  // server/plugins/sitemap-urls.ts emit a single flat /sitemap.xml.
   sitemap: {
     autoI18n: false,
   },
@@ -27,18 +27,28 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // Toggle to reproduce the "before" (stock, no product URLs) vs "after" (canonical +
-      // hreflang product URLs) sitemap states without editing code - see README.
+      // Toggle to reproduce the "before" (stock, no product URLs) vs "after" (canonical
+      // product URLs) sitemap states without editing code - see README.
       enableProductSitemap: true,
     },
   },
 
+  // Matches how the real production frontends currently do locale switching: a single URL per
+  // page, with the active language read back from the `i18n_redirected` cookie rather than a
+  // /en /th URL prefix. See docs/dynamic-sitemap-seo-article.md for the SEO tradeoff this
+  // implies (a crawler, which doesn't carry cookies, only ever sees the default-locale content).
   i18n: {
     locales: [
       { code: 'th', language: 'th-TH', name: 'ไทย', file: 'th.json' },
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
     ],
     defaultLocale: 'th',
-    strategy: 'prefix_except_default',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+      alwaysRedirect: false,
+    },
   },
 })

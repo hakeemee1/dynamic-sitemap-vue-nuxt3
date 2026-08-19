@@ -1,5 +1,13 @@
 # Spec: Dynamic Sitemap POC for E-commerce SEO Knowledge Share
 
+> **Amendment (post-implementation):** every `hreflang` / `prefix_except_default` reference below
+> describes the originally planned approach. The implementation was changed to use
+> `@nuxtjs/i18n`'s `no_prefix` strategy with cookie-based locale switching (`i18n_redirected`),
+> matching how the real production frontends currently work. See
+> `docs/tickets/03-multilang-hreflang-sitemap.md` for the revised ticket and the "Multi-language
+> sites" section of `docs/dynamic-sitemap-seo-article.md` for why that means no `hreflang`
+> alternates are emitted.
+
 ## Problem Statement
 
 Our Nuxt 3 e-commerce frontends generate `sitemap.xml` automatically via `@nuxtjs/sitemap`, but that automatic discovery only picks up static, file-based routes. Product detail pages that are addressed via query-string parameters (a routing pattern our frontends actually use, e.g. `/products/detail?product_id=123`) are invisible to the module's auto-discovery. The practical result: the sitemap lists a handful of top-level pages (home, listing, campaign pages) and **zero individual product URLs**.

@@ -2,7 +2,6 @@
 import type { ProductRecord } from '../server/api/products'
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
 
 const { data: products } = await useFetch<ProductRecord[]>('/api/products')
 </script>
@@ -19,7 +18,7 @@ const { data: products } = await useFetch<ProductRecord[]>('/api/products')
         class="rounded-lg border border-slate-200 bg-white p-4"
       >
         <NuxtLink
-          :to="{ path: localePath('/products/detail'), query: { product_id: product.id } }"
+          :to="{ path: '/products/detail', query: { product_id: product.id } }"
           class="font-medium hover:underline"
         >
           {{ product.name[locale as 'th' | 'en'] }}
